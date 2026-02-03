@@ -429,8 +429,16 @@ button {
 }
 
 /* posts */
-
 .post-container {
+  display: flex;           /* pakai flex agar card berjejer horizontal */
+  flex-wrap: wrap;         /* pindah ke baris baru jika penuh */
+  gap: var(--space-md);    /* jarak antar card */
+  justify-content: center; /* rata tengah */
+  margin-block: var(--space-md);
+}
+
+/* oldPos */
+/* .post-container {
   margin-block: var(--space-md);
   display: grid;
   gap: var(--space-md);
@@ -443,7 +451,7 @@ button {
   @media (--lg) {
     grid-template-columns: 1fr 1fr 1fr;
   }
-}
+} */
 
 .badge {
   padding: 4px 10px;
@@ -469,7 +477,48 @@ button {
 }
 
 /* cards */
+/* cards */
 .card {
+  display: grid;
+  background-color: hsl(var(--muted));
+  padding: var(--space-sm); /* sebelumnya var(--space-md) */
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  max-width: 350px; /* batasi lebar card */
+}
+
+.card [aria-hidden="true"] {
+  margin-inline: calc(var(--space-sm) * -1);
+  margin-block: var(--space-sm);
+}
+
+.card img {
+  box-shadow: var(--shadow-sm);
+  object-fit: cover;
+  height: 200px; /* sebelumnya 250px */
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.card .content {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.card .content .h3 a {
+  font-size: var(--fs-md); /* sebelumnya fs-lg */
+}
+
+.card small {
+  font-size: var(--fs-sm);
+}
+
+.card p {
+  font-size: 0.9rem; /* perkecil deskripsi */
+}
+
+/* //oldCard */
+/* .card {
   display: grid;
   background-color: hsl(var(--muted));
   padding: var(--space-md);
@@ -478,9 +527,9 @@ button {
 
   & .badge {
     --accent: var(--txt);
-  }
+  } */
 
-  & [aria-hidden="true"] {
+  /* & [aria-hidden="true"] {
     margin-inline: calc(var(--space-md) * -1);
     margin-block: var(--space-md);
   }
@@ -498,7 +547,7 @@ button {
     display: grid;
     gap: var(--space-xs);
   }
-}
+} */
 
 /* posts */
 header {
