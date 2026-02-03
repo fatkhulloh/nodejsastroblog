@@ -1,6 +1,7 @@
 ---
 import MainHead from './MainHead.astro';
 import Footer from '../components/Footer.astro'
+// import "../styles/global.css"
 
 interface Props {
   title?: string;
@@ -23,7 +24,7 @@ const { title = "My Astro Blog",
 	<body>
 		<slot>
             Default Content
-        </slot>
+    </slot>
 		<Footer/>
 	</body>
 </html>
