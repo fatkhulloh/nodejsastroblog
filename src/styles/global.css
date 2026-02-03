@@ -484,7 +484,7 @@ button {
   padding: var(--space-sm); /* sebelumnya var(--space-md) */
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
-  max-width: 350px; /* batasi lebar card */
+  max-width: 450px; /* batasi lebar card */
 }
 
 .card [aria-hidden="true"] {
