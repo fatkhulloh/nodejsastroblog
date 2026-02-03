@@ -1,13 +1,14 @@
 ---
 import PostCard from "../../components/PostCard.astro";
 import MainLayout from "../../layouts/MainLayout.astro";
+import PostHeader from "../../components/PostHeader.astro";
 
   const allPosts = await Astro.glob("./*.md");
 //   console.log(allPosts[0])
 ---
 
 <MainLayout title="My Blog">
-   
+   <!-- <PostHeader title = "Post" /> -->
   {
     allPosts.map((post)=>(
         <PostCard frontmatter={post.frontmatter} url={post.url} tagType="h2" />
