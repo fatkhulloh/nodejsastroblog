@@ -8,6 +8,12 @@ export default defineConfig({
     enabled: false,
   },
   integrations: [
-    icon(), // ✨ integrasi astro-icon
+    icon({
+      // folder untuk local icon
+      // @ts-ignore
+      collections: {
+        local: './src/icons', // 🗂 path ke folder ikon lokal
+      },
+    }),
   ],
 });
