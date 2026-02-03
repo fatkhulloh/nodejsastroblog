@@ -1,0 +1,29 @@
+---
+import MainHead from './MainHead.astro';
+import Footer from '../components/Footer.astro'
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  frontmatter?: Record<string, any>;
+  robots?: string;
+}
+
+const { title = "My Astro Blog",
+  description = "My musings about the Astro framework",
+  image,
+  frontmatter,
+  robots,
+} = Astro.props || {};
+---
+
+<html lang="en">
+	  <MainHead {title} {description} {image} {frontmatter} {robots} />
+	<body>
+		<slot>
+            Default Content
+        </slot>
+		<Footer/>
+	</body>
+</html>
