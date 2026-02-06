@@ -1,0 +1,200 @@
+---
+import { slugify, formatDate } from "../js/utils";
+import { Image } from "astro:assets";
+import Link from "./Link.astro";
+
+const { project } = Astro.props;
+const { title, date, author, category, image, description, shortdescription } = project;
+
+// URL halaman project
+const url = `/projects/${slugify(title)}`;
+
+// Data image
+let imageData = null;
+if (image) {
+  const src = `http://localhost:1337${image.formats?.thumbnail?.url || image.url}`;
+  const alt = image.alternativeText || title;
+  imageData = { src, alt };
+}
+---
+
+<article class="card">
+  <div class="badge-container">
+    <small>
+      <a href={`/category/${slugify(category)}`} class="badge">{category}</a>
+    </small>
+  </div>
+
+  {imageData && (
+    <a href={url} aria-hidden="true" tabindex="-1" class="card-image-link">
+      <Image
+        src={imageData.src}
+        alt={imageData.alt}
+        width={400}
+        height={200}
+        format="webp"
+        fit="cover"
+        style="width:100%; height:100%; object-fit:cover;"
+      />
+    </a>
+  )}
+
+  <div class="content">
+    <div class="text-wrapper">
+      <h3 class="h3"><a href={url}>{title}</a></h3>
+      <small>by <a href={`/author/${slugify(author)}`}>{author}</a> {formatDate(date)}</small>
+      <p class="shortdesc">{shortdescription}</p>
+    </div>
+    <Link href={url} text="Read Post" style="secondary" />
+  </div>
+</article>
+
+<style>
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 340px;          /* ditambah sedikit dari 320px */
+  height: 450px;
+  background-color: hsl(var(--muted));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-image-link {
+  flex: 0 0 45%;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-sm);
+  justify-content: space-between;
+}
+
+.text-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  gap: var(--space-2xs);
+}
+
+.shortdesc {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-sm);
+}
+
+.badge-container {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+.card h3 a {
+  text-decoration: none;
+  color: hsl(var(--txt));
+}
+
+.card h3 a:hover {
+  color: hsl(var(--accent));
+}
+
+@media (max-width: 480px) {
+  .card {
+    width: 90%;
+    height: auto;
+  }
+
+  .card-image-link {
+    flex: 0 0 auto;
+    height: 180px;
+  }
+}
+</style>
+
+
+<style>
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  height: 450px;
+  background-color: hsl(var(--muted));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-image-link {
+  flex: 0 0 45%; /* tinggi gambar 45% card */
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-sm);
+  justify-content: space-between; /* pastikan text di atas, button di bawah */
+}
+
+.text-wrapper {
+  flex: 1; /* dorong tombol ke bawah */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  gap: var(--space-2xs);
+}
+
+.shortdesc {
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* maksimal 4 baris */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-sm);
+}
+
+.badge-container {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+.card h3 a {
+  text-decoration: none;
+  color: hsl(var(--txt));
+}
+
+.card h3 a:hover {
+  color: hsl(var(--accent));
+}
+
+/* Responsif: sesuaikan lebar card di layar kecil */
+@media (max-width: 480px) {
+  .card {
+    width: 90%;
+    height: auto; /* tinggi otomatis */
+  }
+
+  .card-image-link {
+    flex: 0 0 auto;
+    height: 180px;
+  }
+}
+</style>

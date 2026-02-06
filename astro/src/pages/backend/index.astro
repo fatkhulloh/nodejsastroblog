@@ -1,36 +1,39 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
-
+import PostCardBackend from "../../components/PostCardBackend.astro"
 // Fetch data dari Strapi
-const res = await fetch("http://localhost:1337/api/projects");
+// const res = await fetch("http://localhost:1337/api/projects");
+const res = await fetch('http://localhost:1337/api/projects?populate=image');
 const data = await res.json();
 
 // Data projects ada di data.data
 const projects = data.data || [];
 
-console.log("DataSatu: ", projects);
+// console.log("DataSatu: ", projects);
 
-// Fungsi format tanggal
-const formatDate = (dateString) => {
-  const options = { year: "numeric", month: "long", day: "numeric" };
-  return new Date(dateString).toLocaleDateString("id-ID", options);
-};
+// const formatDate = (dateString) => {
+//   const options = { year: "numeric", month: "long", day: "numeric" };
+//   return new Date(dateString).toLocaleDateString("id-ID", options);
+// };
 ---
 
 <MainLayout title="Blog From Data Backend">
   <section class="container" aria-label="Blog Posts From Backend">
-    <h1 class="h1">Blog Posts From Backend</h1>
+    <h1 class="h1">Blog Posts</h1>
+    <h3>From Backend</h3>
 
     {projects.length > 0 ? (
-      <div class="grid gap-6 mt-6">
+      <div class=" post-container grid gap-6 mt-6">
         {projects.map((project) => (
-          <article class="border rounded-lg p-4 shadow hover:shadow-md transition" key={project.id}>
-            <h2 class="text-2xl font-bold">{project.title}</h2>
-            <p class="text-sm text-gray-500">
-              By {project.author} | {formatDate(project.date)} | Category: {project.category}
-            </p>
-            <p class="mt-2 text-gray-700">{project.description}</p>
-          </article>
+            <PostCardBackend {project}/>
+        //   <article class="border rounded-lg p-4 shadow hover:shadow-md transition" key={project.id}>
+        //     <h2 class="text-2xl font-bold">{project.title}</h2>
+        //     <p class="text-sm text-gray-500">
+        //       By {project.author} | {formatDate(project.date)} | Category: {project.category}
+        //     </p>
+        //     <p class="mt-2 text-gray-700">{project.description}</p>
+        //     <br/>
+        //   </article>
         ))}
       </div>
     ) : (

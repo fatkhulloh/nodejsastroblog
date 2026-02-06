@@ -1,0 +1,230 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+
+let message = "";
+---
+
+<MainLayout title="Add New Project">
+  <section class="form-container">
+    <h1 class="h1">Add New Project</h1>
+
+    <form id="projectForm">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" required />
+      </div>
+
+      <div class="form-group">
+        <label>Short Description</label>
+        <textarea name="shortdescription" rows="2" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" rows="5" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Author</label>
+        <input type="text" name="author" required />
+      </div>
+
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" name="category" required />
+      </div>
+
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" name="date" required />
+      </div>
+
+      <div class="form-group">
+        <label>Image</label>
+        <input type="file" name="image" accept="image/*" />
+        <img id="preview" class="preview" />
+      </div>
+
+      <button type="submit">Submit</button>
+      <p id="msg">{message}</p>
+    </form>
+  </section>
+
+  <script type="module">
+    const form = document.getElementById('projectForm');
+    const preview = document.getElementById('preview');
+    const msg = document.getElementById('msg');
+
+    // preview image
+    form.image.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        // 1️⃣ Buat entry project dulu tanpa image
+        const resEntry = await fetch('http://localhost:1337/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: {
+              title: form.title.value,
+              shortdescription: form.shortdescription.value,
+              description: form.description.value,
+              author: form.author.value,
+              category: form.category.value,
+              date: form.date.value,
+              draft: false
+            }
+          })
+        });
+
+        if (!resEntry.ok) throw new Error('Failed to create project entry');
+
+        const entry = await resEntry.json();
+        const projectId = entry.data.id;
+
+        // 2️⃣ Upload image kalau ada
+        if (form.image.files[0]) {
+          const formData = new FormData();
+          formData.append('files', form.image.files[0]); // HARUS 'files'
+          formData.append('refId', projectId);
+          formData.append('ref', 'api::project.project'); // UID collection type
+          formData.append('field', 'image');             // nama field media
+
+          const resUpload = await fetch('http://localhost:1337/api/upload', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!resUpload.ok) throw new Error('Failed to upload image');
+        }
+
+        msg.textContent = 'Project submitted successfully!';
+        msg.style.color = 'hsl(var(--accent))';
+        form.reset();
+        preview.src = '';
+        preview.style.display = 'none';
+
+      } catch (err) {
+        msg.textContent = 'Error submitting project: ' + err.message;
+        msg.style.color = 'red';
+      }
+    });
+  </script>
+
+  <style>
+    .form-container {
+      max-width: 800px;
+      margin-inline: auto;
+      padding: var(--space-lg);
+      background-color: hsl(var(--muted));
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      display: grid;
+      gap: var(--space-lg);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: var(--fs-2xl);
+      color: hsl(var(--accent));
+    }
+
+    form {
+      display: grid;
+      gap: var(--space-md);
+    }
+
+    .form-group {
+      display: grid;
+      gap: var(--space-2xs);
+    }
+
+    label {
+      font-weight: 700;
+      color: hsl(var(--txt));
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea,
+    input[type="file"] {
+      padding: var(--space-xs);
+      font-size: var(--fs-md);
+      border: 1px solid hsl(var(--txt) / 0.2);
+      border-radius: var(--radius-sm);
+      background-color: hsl(var(--bkg));
+      color: hsl(var(--txt));
+      transition: box-shadow var(--transition-ease-fast), border-color var(--transition-ease-fast);
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    textarea:focus,
+    input[type="file"]:focus {
+      outline: none;
+      border-color: hsl(var(--accent));
+      box-shadow: 0 0 0 3px hsl(var(--accent) / 0.3);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button {
+      width: 100%;
+      max-width: 200px;
+      padding: var(--space-xs) var(--space-md);
+      font-size: var(--fs-md);
+      background-color: hsl(var(--accent));
+      color: hsl(var(--bkg));
+      border-radius: var(--radius-md);
+      border: none;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
+      transition: background-color var(--transition-ease-fast), box-shadow var(--transition-ease-fast);
+    }
+
+    button:hover {
+      background-color: hsl(var(--accent) / 0.85);
+      box-shadow: var(--shadow-md);
+    }
+
+    .preview {
+      margin-top: var(--space-xs);
+      max-height: 250px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      box-shadow: var(--shadow-sm);
+      display: none;
+    }
+
+    #msg {
+      font-weight: 700;
+      text-align: center;
+      font-size: var(--fs-md);
+    }
+
+    @media (--md) {
+      .form-container {
+        padding: var(--space-xl);
+      }
+    }
+  </style>
+</MainLayout>

@@ -38,6 +38,9 @@
     },
     "category": {
       "type": "string"
+    },
+    "shortdescription": {
+      "type": "string"
     }
   }
 }
