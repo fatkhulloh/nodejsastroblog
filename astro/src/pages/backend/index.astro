@@ -1,12 +1,40 @@
 ---
 import MainLayout from "../../layouts/MainLayout.astro";
 
+// Fetch data dari Strapi
+const res = await fetch("http://localhost:1337/api/projects");
+const data = await res.json();
 
+// Data projects ada di data.data
+const projects = data.data || [];
+
+console.log("DataSatu: ", projects);
+
+// Fungsi format tanggal
+const formatDate = (dateString) => {
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("id-ID", options);
+};
 ---
 
 <MainLayout title="Blog From Data Backend">
-    <section class="container" aria-label="Blog Posts From Backend">
-        <h1 class="h1">Blog Post From Backend</h1>
-    </section>
+  <section class="container" aria-label="Blog Posts From Backend">
+    <h1 class="h1">Blog Posts From Backend</h1>
 
+    {projects.length > 0 ? (
+      <div class="grid gap-6 mt-6">
+        {projects.map((project) => (
+          <article class="border rounded-lg p-4 shadow hover:shadow-md transition" key={project.id}>
+            <h2 class="text-2xl font-bold">{project.title}</h2>
+            <p class="text-sm text-gray-500">
+              By {project.author} | {formatDate(project.date)} | Category: {project.category}
+            </p>
+            <p class="mt-2 text-gray-700">{project.description}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p>No projects found.</p>
+    )}
+  </section>
 </MainLayout>
