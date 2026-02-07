@@ -1,0 +1,171 @@
+---
+import { slugify, formatDate } from "../../../js/utils";
+import { Image } from "astro:assets";
+import Link from "../../../components/Link.astro";
+
+const { project } = Astro.props;
+const { title, date, author, category, image, description, shortdescription } = project;
+
+// URL halaman project
+const url = `/projects/${slugify(title)}`;
+
+// Data image
+let imageData = null;
+if (image) {
+  const src = `http://localhost:1337${image.formats?.thumbnail?.url || image.url}`;
+  const alt = image.alternativeText || title;
+  imageData = { src, alt };
+}
+---
+
+<article class="post-card-new">
+  <div class="badge-container">
+    <small>
+      <a href={`/backend/category/${slugify(category)}`} class="badge">{category}</a>
+    </small>
+  </div>
+
+  {imageData && (
+    <a href={url} aria-hidden="true" tabindex="-1" class="card-image-link">
+      <Image
+        src={imageData.src}
+        alt={imageData.alt}
+        width={400}
+        height={200}
+        format="webp"
+        fit="cover"
+      />
+    </a>
+  )}
+
+  <div class="content">
+    <div class="text-wrapper">
+      <h3><a href={url}>{title}</a></h3>
+      <small>by <a href={`/author/${slugify(author)}`}>{author}</a> {formatDate(date)}</small>
+      {shortdescription
+        ? <p class="shortdesc">{shortdescription}</p>
+        : <p class="shortdesc empty">&nbsp;</p>
+      }
+    </div>
+    <Link href={url} text="Read Post" style="secondary" />
+  </div>
+</article>
+
+<style>
+/* ===========================
+   Post Card Baru (Unique Class)
+   =========================== */
+.post-card-new {
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  min-width: 300px; /* jangan terlalu kecil */
+  height: 450px;
+  background-color: hsl(var(--muted));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+/* Badge kategori */
+.post-card-new .badge-container {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+.post-card-new .badge {
+  padding: 4px 10px;
+  background-color: hsl(var(--accent));
+  border-radius: var(--radius-sm);
+  color: hsl(var(--muted));
+  text-decoration: none;
+  letter-spacing: 0.054em;
+  text-transform: uppercase;
+  font-size: var(--fs-sm);
+}
+
+.post-card-new .badge:hover {
+  opacity: 0.8;
+}
+
+/* Gambar */
+.post-card-new .card-image-link {
+  flex: 0 0 45%; /* tinggi gambar sekitar 45% */
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.post-card-new .card-image-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Konten: teks + tombol */
+.post-card-new .content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* text di atas, tombol di bawah */
+  padding: var(--space-sm);
+}
+
+/* Wrapper teks */
+.post-card-new .text-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Judul & link */
+.post-card-new h3 a {
+  text-decoration: none;
+  color: hsl(var(--txt));
+  font-size: var(--fs-lg);
+}
+
+.post-card-new h3 a:hover {
+  color: hsl(var(--accent));
+}
+
+/* Deskripsi pendek */
+.post-card-new .shortdesc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* maksimal 2 baris */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-sm);
+  margin: 0;
+}
+
+/* Cadangan space jika shortdesc kosong */
+.post-card-new .shortdesc.empty {
+  min-height: 2em;
+}
+
+/* Tombol Read Post */
+.post-card-new .link {
+  justify-self: end;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .post-card-new {
+    width: 90%;
+    min-width: 280px;
+    height: 400px;
+  }
+  .post-card-new .card-image-link {
+    flex: 0 0 auto;
+    height: 180px;
+  }
+}
+</style>

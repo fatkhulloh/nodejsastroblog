@@ -17,11 +17,10 @@ if (image) {
   imageData = { src, alt };
 }
 ---
-
-<article class="card">
+<article class="card card-adjusted">
   <div class="badge-container">
     <small>
-      <a href={`/category/${slugify(category)}`} class="badge">{category}</a>
+      <a href={`/backend/category/${slugify(category)}`} class="badge">{category}</a>
     </small>
   </div>
 
@@ -39,22 +38,23 @@ if (image) {
     </a>
   )}
 
-  <div class="content">
+  <div class="content content-adjusted">
     <div class="text-wrapper">
       <h3 class="h3"><a href={url}>{title}</a></h3>
       <small>by <a href={`/author/${slugify(author)}`}>{author}</a> {formatDate(date)}</small>
-      <p class="shortdesc">{shortdescription}</p>
+      {shortdescription && <p class="shortdesc">{shortdescription}</p>}
+      {!shortdescription && <p class="shortdesc empty">&nbsp;</p>}
     </div>
     <Link href={url} text="Read Post" style="secondary" />
   </div>
 </article>
 
 <style>
-.card {
-  position: relative;
+.card-adjusted {
   display: flex;
   flex-direction: column;
-  width: 340px;          /* ditambah sedikit dari 320px */
+  min-width: 300px;   /* pastikan width minimum */
+  width: 340px;       /* default width */
   height: 450px;
   background-color: hsl(var(--muted));
   border-radius: var(--radius-md);
@@ -69,30 +69,34 @@ if (image) {
   overflow: hidden;
 }
 
-.content {
-  flex: 1;
+.content-adjusted {
   display: flex;
   flex-direction: column;
+  justify-content: space-between; /* text di atas, tombol di bawah */
+  flex: 1;
+  width: 100%; /* pastikan content lebar penuh */
   padding: var(--space-sm);
-  justify-content: space-between;
 }
 
 .text-wrapper {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  overflow: hidden;
   gap: var(--space-2xs);
+  width: 100%; /* isi penuh horizontal */
 }
 
 .shortdesc {
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 2; /* maksimal 2 baris */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--fs-sm);
+  margin: 0;
+}
+
+.shortdesc.empty {
+  min-height: 2em; /* cadangan space saat kosong */
 }
 
 .badge-container {
@@ -110,86 +114,12 @@ if (image) {
   color: hsl(var(--accent));
 }
 
+/* Responsive */
 @media (max-width: 480px) {
-  .card {
+  .card-adjusted {
     width: 90%;
-    height: auto;
-  }
-
-  .card-image-link {
-    flex: 0 0 auto;
-    height: 180px;
-  }
-}
-</style>
-
-
-<style>
-.card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 320px;
-  height: 450px;
-  background-color: hsl(var(--muted));
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-
-.card-image-link {
-  flex: 0 0 45%; /* tinggi gambar 45% card */
-  display: block;
-  width: 100%;
-  overflow: hidden;
-}
-
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-sm);
-  justify-content: space-between; /* pastikan text di atas, button di bawah */
-}
-
-.text-wrapper {
-  flex: 1; /* dorong tombol ke bawah */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  overflow: hidden;
-  gap: var(--space-2xs);
-}
-
-.shortdesc {
-  display: -webkit-box;
-  -webkit-line-clamp: 4; /* maksimal 4 baris */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: var(--fs-sm);
-}
-
-.badge-container {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-}
-
-.card h3 a {
-  text-decoration: none;
-  color: hsl(var(--txt));
-}
-
-.card h3 a:hover {
-  color: hsl(var(--accent));
-}
-
-/* Responsif: sesuaikan lebar card di layar kecil */
-@media (max-width: 480px) {
-  .card {
-    width: 90%;
-    height: auto; /* tinggi otomatis */
+    min-width: 280px;
+    height: 400px;
   }
 
   .card-image-link {

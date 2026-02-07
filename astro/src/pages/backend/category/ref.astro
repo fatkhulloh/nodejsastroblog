@@ -1,0 +1,59 @@
+---
+import MainLayout from "../../../layouts/MainLayout.astro";
+import PostCard from "../../../components/PostCard.astro";
+
+// 1️⃣ Tentukan daftar category yang ingin dibuat
+const categories = ["fnb", "web", "mobile"]; // bisa hardcode atau ambil dari backend lain
+
+export async function getStaticPaths() {
+  // Map tiap category ke path + props (fetch filtered data langsung)
+  const paths = await Promise.all(
+    categories.map(async (category) => {
+      const res = await fetch(
+        `http://localhost:1337/api/projects?populate=image&filters[category][$eq]=${category.toUpperCase()}`
+      );
+      const json = await res.json();
+      const posts = json.data ?? [];
+
+      return {
+        params: { category }, // URL: /backend/category/{category}
+        props: { posts },     // dikirim ke page
+      };
+    })
+  );
+
+  return paths;
+}
+
+// 2️⃣ Ambil params & props
+const { category } = Astro.params;
+const { posts } = Astro.props;
+
+// 3️⃣ Buat title readable
+const categoryTitle = category
+  .replace(/-/g, " ")
+  .replace(/\b\w/g, l => l.toUpperCase());
+---
+<!-- <MainLayout title={categoryTitle}> -->
+  <section class="container" aria-label={`Posts about ${categoryTitle}`}>
+    <h1 class="h1">
+      Posts about <span>{categoryTitle}</span>
+    </h1>
+
+    <div class="post-container">
+      {posts.length === 0 && <p>No posts found in this category.</p>}
+
+      {posts.map(post => (
+        <PostCard
+          frontmatter={{
+            title: post.attributes.title,
+            description: post.attributes.description,
+            image: post.attributes.image?.formats?.medium?.url ?? null,
+          }}
+          url={`/backend/${post.attributes.slug}`}
+          tagType="h2"
+        />
+      ))}
+    </div>
+  </section>
+</MainLayout>
