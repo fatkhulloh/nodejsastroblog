@@ -4,6 +4,14 @@ let message = "";
 ---
 
 <MainLayout title="Add New Project">
+  <script is:inline>
+     // Jika Sudah login tidak bisa akses halam ini
+    const storedData = localStorage.getItem("data");
+    if (!storedData) {
+      // replace agar tidak bisa kembali ke login
+      window.location.replace("/");
+    }
+  </script>
   <section class="form-container">
     <h1 class="h1">Add New Project</h1>
 

@@ -4,7 +4,6 @@ import { Icon } from "astro-icon/components";
 import Link from "./Link.astro";
 import navData from "../data/navData";
 ---
-
 <nav aria-label="Primary">
   <div class="navbar">
     <!-- Logo -->
@@ -33,7 +32,7 @@ import navData from "../data/navData";
       <Link text="Register" href="/register" style="primary" isFilled={true} id="registerBtn"/>
       
       <!-- User dropdown -->
-      <div class="user-menu" id="userMenu" style="display:none;">
+      <div class="user-menu" id="userMenu">
         <button id="usernameBtn">Username</button>
         <ul class="dropdown" id="dropdownMenu">
           <li><button id="logoutBtn">Logout</button></li>
@@ -74,8 +73,7 @@ import navData from "../data/navData";
     }
   });
 
-  // Cek JWT di localStorage
-  const dataStr = localStorage.getItem("data");
+  // DOM elements
   const loginBtn = document.getElementById("loginBtn");
   const registerBtn = document.getElementById("registerBtn");
   const userMenu = document.getElementById("userMenu");
@@ -83,21 +81,36 @@ import navData from "../data/navData";
   const dropdownMenu = document.getElementById("dropdownMenu");
   const logoutBtn = document.getElementById("logoutBtn");
 
-  if (dataStr) {
-    try {
-      const data = JSON.parse(dataStr);
-      // sembunyikan login/register
-      loginBtn.style.display = "none";
-      registerBtn.style.display = "none";
-      
-      // tampilkan username
-      usernameBtn.textContent = data.user.username || data.user.email;
-      userMenu.style.display = "flex";
-
-    } catch (err) {
-      console.error("Error parsing data:", err);
+  // Fungsi update navbar berdasarkan login
+  function updateNavbar() {
+    const dataStr = localStorage.getItem("data");
+    if (dataStr) {
+      try {
+        const data = JSON.parse(dataStr);
+        // Set username
+        usernameBtn.textContent = data.user.username || data.user.email;
+        // Show user menu
+        userMenu.style.display = "flex";
+        // Hide login/register
+        loginBtn.style.display = "none";
+        registerBtn.style.display = "none";
+      } catch (err) {
+        console.error("Error parsing data:", err);
+        // fallback: hide user menu
+        userMenu.style.display = "none";
+        loginBtn.style.display = "inline-flex";
+        registerBtn.style.display = "inline-flex";
+      }
+    } else {
+      // Not logged in
+      userMenu.style.display = "none";
+      loginBtn.style.display = "inline-flex";
+      registerBtn.style.display = "inline-flex";
     }
   }
+
+  // Jalankan saat load
+  updateNavbar();
 
   // Toggle dropdown
   usernameBtn.addEventListener("click", () => {
@@ -107,10 +120,11 @@ import navData from "../data/navData";
   // Logout
   logoutBtn.addEventListener("click", () => {
     localStorage.removeItem("data");
-    window.location.reload();
+    updateNavbar();
+    window.location.replace("/"); // redirect
   });
 
-  // klik di luar dropdown menutup dropdown
+  // Klik di luar dropdown menutup dropdown
   document.addEventListener("click", (e) => {
     if (!userMenu.contains(e.target)) {
       dropdownMenu.style.display = "none";
@@ -135,30 +149,6 @@ import navData from "../data/navData";
 
 <style>
 /* Navbar umum */
-
-/* Override khusus untuk username di navbar */
-.user-menu #usernameBtn {
-  width: auto;            /* biar mengikuti panjang username */
-  min-width: 6rem;        /* optional, supaya tidak terlalu kecil */
-  height: auto;           /* menyesuaikan padding */
-  padding: 0.5rem 1rem;   /* ruang di dalam tombol */
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between; /* jika mau icon dropdown */
-  /* background-color: hsl(var(--accent)); */
-  /* background-color: gray; */
-  color: hsl(var(--txt-inverse));
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-}
-.user-menu .dropdown {
-  /* top: calc(100% + 0.25rem);  */
-  top: calc(100% + 0.65rem); /* beri jarak dari tombol */
-  right: 0;
-  min-width: 140px;          /* lebih lebar */
-  max-width: 250px;
-}
-
 .navbar {
   display: flex;
   align-items: center;
@@ -210,65 +200,53 @@ import navData from "../data/navData";
   align-items: center;
 }
 
-.nav-buttons a {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s;
+/* Default: tampilkan login/register */
+#loginBtn, #registerBtn {
+  display: inline-flex;
 }
 
-.nav-buttons a[style="primary"] {
-  background-color: hsl(var(--accent));
-  color: hsl(var(--txt-inverse));
-}
-
-.nav-buttons a[style="primary"]:hover {
-  background-color: hsl(var(--accent-hover));
-}
-
-.nav-buttons a[style="secondary"] {
-  background-color: transparent;
-  border: 1px solid hsl(var(--accent));
-  color: hsl(var(--accent));
-}
-
-.nav-buttons a[style="secondary"]:hover {
-  background-color: hsl(var(--accent));
-  color: hsl(var(--txt-inverse));
-}
-
-/* User menu */
+/* Default: sembunyikan user menu */
 .user-menu {
-  position: relative;
-  display: flex;
-  align-items: center;
+  display: none;
 }
 
+/* Tombol username */
 #usernameBtn {
-  background: none;
-  border: none;
-  color: hsl(var(--txt-light));
-  font-weight: 500;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.5rem 1rem;
+  min-width: 6rem;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: hsl(var(--txt-inverse));
+  font-weight: 500;
 }
 
 #usernameBtn:hover {
-  color: hsl(var(--accent));
+  background-color: hsl(var(--accent));
+  /* background-color: hsl(var(--accent-hover)); */
+  color: hsl(var(--txt-inverse));
 }
 
-.dropdown {
-  position: absolute;
-  top: 100%;
+/* Dropdown */
+.user-menu .dropdown {
+  top: calc(100% + 0.15rem);
   right: 0;
+  min-width: 140px;
+  max-width: 250px;
+  position: absolute;
+  display: none;
+  flex-direction: column;
   background-color: hsl(var(--bg-dark));
   border-radius: var(--radius-sm);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   overflow: hidden;
-  min-width: 120px;
-  display: none;
-  flex-direction: column;
 }
 
 .dropdown li button {

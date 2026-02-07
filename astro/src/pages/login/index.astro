@@ -3,6 +3,14 @@ import MainLayout from "../../layouts/MainLayout.astro";
 ---
 
 <MainLayout>
+  <script is:inline>
+     // Jika Sudah login tidak bisa akses halam ini
+    const storedData = localStorage.getItem("data");
+    if (storedData) {
+      // replace agar tidak bisa kembali ke login
+      window.location.replace("/");
+    }
+  </script>
   <main class="login-page">
     <div class="login-container">
       <h1 class="hh">Login</h1>
