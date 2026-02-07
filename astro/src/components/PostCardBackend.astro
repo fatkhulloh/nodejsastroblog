@@ -4,10 +4,10 @@ import { Image } from "astro:assets";
 import Link from "./Link.astro";
 
 const { project } = Astro.props;
-const { title, date, author, category, image, description, shortdescription } = project;
+const { title,id, date, author, category, image, description, shortdescription } = project;
 
 // URL halaman project
-const url = `/projects/${slugify(title)}`;
+const url = `/backend/posts/${slugify(id)}`;
 
 // Data image
 let imageData = null;
@@ -45,7 +45,7 @@ if (image) {
   <div class="content content-adjusted">
     <div class="text-wrapper">
       <h3><a href={url}>{title}</a></h3>
-      <small>by <a href={`/author/${slugify(author)}`}>{author}</a> {formatDate(date)}</small>
+      <small>by <a href={`/backend/author/${slugify(author)}`}>{author}</a> {formatDate(date)}</small>
       {shortdescription
         ? <p class="shortdesc">{shortdescription}</p>
         : <p class="shortdesc empty">&nbsp;</p>

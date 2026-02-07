@@ -1,41 +1,42 @@
 ---
 import MainLayout from "../../../layouts/MainLayout.astro";
 import PostCardBackend from "../../../components/PostCardBackend.astro";
+import { slugify, formatDate } from "../../../js/utils";
 
 // 1️⃣ Ambil semua project di getStaticPaths
 export async function getStaticPaths() {
   const res = await fetch("http://localhost:1337/api/projects?populate=image");
   const json = await res.json();
-console.log("Panggil");
+  console.log("Panggil");
   console.log("Json3: ", json);
   // generate paths dari daftar kategori di JSON
- const categories = [...new Set(
-  json.data.map(p => p.category.toLowerCase())
+ const authors = [...new Set(
+  json.data.map(p => slugify(p.author))
 )];
 
 
   // kirim seluruh JSON ke page, tidak ada filter
-  return categories.map(category => ({
-    params: { category },
+  return authors.map(author => ({
+    params: { author },
     props: { projects: json.data }, // kirim semua project
   }));
 }
 
 // 2️⃣ Ambil category dari URL & semua project dari props
-const { category } = Astro.params;
+const { author } = Astro.params;
 const { projects } = Astro.props;
 
 // 3️⃣ Bisa filter/log di sini bebas
-console.log("Paramsnya: ", category)
+console.log("Authornya: ", author)
 console.log("Semua projects (belum difilter):", projects);
 
 // opsional filter di sini kalau mau
 const posts = projects.filter(
-  p => p.category.toLowerCase() === category
+  p => slugify(p.author) === author
 );
 
 // // buat title readable
-const categoryTitle = category.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+const categoryTitle = author.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 ---
 
 <MainLayout title={categoryTitle}>

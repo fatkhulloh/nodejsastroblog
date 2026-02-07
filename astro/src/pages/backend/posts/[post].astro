@@ -1,0 +1,119 @@
+---
+import MainLayout from "../../../layouts/MainLayout.astro";
+import { slugify, formatDate } from "../../../js/utils";
+
+// Ambil semua project di build time
+export async function getStaticPaths() {
+  const res = await fetch("http://localhost:1337/api/projects?populate=image");
+  const json = await res.json();
+
+  // generate slug untuk setiap project berdasarkan id atau title
+  const posts = [...new Set(json.data.map(p => slugify(p.id)))];
+
+  return posts.map(post => ({
+    params: { post },
+    props: { projects: json.data }, // kirim semua project
+  }));
+}
+
+// props projects akan diterima dari getStaticPaths
+const { projects } = Astro.props;
+
+// Ambil slug post dari URL
+const currentPostSlug = Astro.params.post;
+
+// Filter project yang sesuai dengan slug
+const currentProject = projects.find(
+  project => slugify(project.id) === currentPostSlug
+);
+---
+
+<MainLayout>
+  {currentProject ? (
+    <article class="post-detail">
+      {currentProject.image ? (
+        <img
+          src={`http://localhost:1337${currentProject.image.url}`}
+          alt={currentProject.title}
+          class="post-image"
+        />
+      ) : (
+        <div class="post-image placeholder"></div>
+      )}
+
+      <div class="post-content">
+        <h1 class="post-title">{currentProject.title}</h1>
+        <div class="post-meta">
+          <span>by {currentProject.author || "Unknown"}</span> | 
+          <span>{formatDate(currentProject.date)}</span>
+        </div>
+        <p class="post-description">{currentProject.description || "Tidak ada deskripsi."}</p>
+        <a href="/backend/posts" class="btn-back">Kembali ke Daftar Project</a>
+      </div>
+    </article>
+  ) : (
+    <p>Project tidak ditemukan.</p>
+  )}
+</MainLayout>
+
+<style>
+.post-detail {
+  max-width: 800px;
+  margin: 2rem auto;
+  background-color: hsl(var(--muted));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.post-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+.post-image.placeholder {
+  background-color: hsl(var(--muted-2));
+  height: 400px;
+}
+
+.post-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-title {
+  font-size: 2rem;
+  margin: 0;
+  color: hsl(var(--txt));
+}
+
+.post-meta {
+  font-size: var(--fs-sm);
+  color: hsl(var(--txt-muted));
+}
+
+.post-description {
+  font-size: var(--fs-md);
+  line-height: var(--lh-1-6);
+  color: hsl(var(--txt));
+}
+
+.btn-back {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--txt-inverse));
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: 1rem;
+  width: fit-content;
+}
+
+.btn-back:hover {
+  background-color: hsl(var(--accent-hover));
+}
+</style>

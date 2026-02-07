@@ -1,6 +1,6 @@
 ---
-import MainLayout from "../../layouts/MainLayout.astro";
-import PostCardBackend from "../../components/PostCardBackend.astro"
+import MainLayout from "../../../layouts/MainLayout.astro";
+import PostCardBackend from "../../../components/PostCardBackend.astro"
 // Fetch data dari Strapi
 // const res = await fetch("http://localhost:1337/api/projects");
 const res = await fetch('http://localhost:1337/api/projects?populate=image');

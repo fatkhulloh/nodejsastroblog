@@ -13,7 +13,7 @@ const navData =[
   },
   {
     name: "Backend",
-    path: "/backend/",
+    path: "/backend/posts",
   },
 ];
 
