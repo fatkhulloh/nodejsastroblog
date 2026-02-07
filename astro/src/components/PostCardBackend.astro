@@ -20,12 +20,14 @@ if (image) {
 <article class="card card-adjusted">
   <div class="badge-container">
     <small>
-      <a href={`/backend/category/${slugify(category)}`} class="badge">{category}</a>
+      <a href={`/backend/category/${slugify(category || 'uncategorized')}`} class="badge">
+        {category || 'Uncategorized'}
+      </a>
     </small>
   </div>
 
-  <!-- {imageData && (
-    <a href={url} aria-hidden="true" tabindex="-1" class="card-image-link">
+  {imageData ? (
+    <a href={url} class="card-image-link">
       <Image
         src={imageData.src}
         alt={imageData.alt}
@@ -33,79 +35,73 @@ if (image) {
         height={200}
         format="webp"
         fit="cover"
-        style="width:100%; height:100%; object-fit:cover;"
+        style="width:100%; height:100%; object-fit:cover; min-height:200px"
       />
     </a>
-  )} -->
-    <!-- wrapper image selalu ada -->
-  <!-- <div class="card-image-wrapper-consistent"> -->
-  <!-- <div class=""> -->
-    {imageData ? (
-      <a href={url} aria-hidden="true" tabindex="-1" class="card-image-link">
-        <Image
-          src={imageData.src}
-          alt={imageData.alt}
-          width={400}
-          height={200}
-          format="webp"
-          fit="cover"
-          style="width:100%; height:100%; object-fit:cover;"
-        />
-      </a>
-    ) : (
-      <div class="card-image-placeholder-consistent"></div>
-    )}
-  <!-- </div> -->
+  ) : (
+    <div class="card-image-placeholder-consistent"></div>
+  )}
 
   <div class="content content-adjusted">
     <div class="text-wrapper">
-      <h3 class="h3"><a href={url}>{title}</a></h3>
+      <h3><a href={url}>{title}</a></h3>
       <small>by <a href={`/author/${slugify(author)}`}>{author}</a> {formatDate(date)}</small>
-      {shortdescription && <p class="shortdesc">{shortdescription}</p>}
-      {!shortdescription && <p class="shortdesc empty">&nbsp;</p>}
+      {shortdescription
+        ? <p class="shortdesc">{shortdescription}</p>
+        : <p class="shortdesc empty">&nbsp;</p>
+      }
     </div>
     <Link href={url} text="Read Post" style="secondary" />
   </div>
 </article>
 
 <style>
-
-.card-image-link-consistent,
-.card-image-placeholder-consistent {
-  width: 100%;
-  height: 100%;
-  background-color: transparent;
-}
-
-.card-image-placeholder-consistent {
-  display: block;
-}
 .card-adjusted {
+  position: relative;
   display: flex;
   flex-direction: column;
-  min-width: 300px;   /* pastikan width minimum */
-  width: 340px;       /* default width */
+  min-width: 300px;
+  width: 340px;
   height: 450px;
   background-color: hsl(var(--muted));
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow: visible; /* pastikan badge tidak terpotong */
   box-shadow: var(--shadow-sm);
 }
 
-.card-image-link {
-  flex: 0 0 45%;
-  display: block;
+.badge-container {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 20;
+  background-color: hsl(var(--accent));
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: hsl(var(--txt-on-accent));
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+}
+
+.card-image-link,
+.card-image-placeholder-consistent {
+  flex: 0 0 200px;
   width: 100%;
-  overflow: hidden;
+  display: block;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  min-height: 200px;
+}
+
+.card-image-placeholder-consistent {
+  background-color: hsl(var(--muted-light));
 }
 
 .content-adjusted {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* text di atas, tombol di bawah */
+  justify-content: space-between;
   flex: 1;
-  margin-top: -10px;
-  width: 100%; /* pastikan content lebar penuh */
+  width: 100%;
   padding: var(--space-sm);
 }
 
@@ -113,35 +109,23 @@ if (image) {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
-  width: 100%; /* isi penuh horizontal */
+  width: 100%;
 }
 
 .shortdesc {
   display: -webkit-box;
-  -webkit-line-clamp: 2;       /* maksimal 2 baris */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--fs-sm);
-  line-height: var(--lh-1-4);   /* pastikan line-height sama untuk hitung tinggi */
+  line-height: var(--lh-1-4);
   margin: 0;
-  min-height: calc(var(--fs-sm) * var(--lh-1-4) * 2); /* selalu set tinggi seolah 2 baris */
-}
-
-
-/* jika kosong, tetap tinggi seolah ada 2 baris */
-.shortdesc.empty {
-  min-height: calc(var(--lh-1-4) * var(--fs-sm) * 2); /* 2 baris */
+  min-height: calc(var(--fs-sm) * var(--lh-1-4) * 2);
 }
 
 .shortdesc.empty {
-  min-height: 2em; /* cadangan space saat kosong */
-}
-
-.badge-container {
-  position: absolute;
-  top: 8px;
-  left: 8px;
+  min-height: calc(var(--fs-sm) * var(--lh-1-4) * 2);
 }
 
 .card h3 a {
@@ -153,17 +137,15 @@ if (image) {
   color: hsl(var(--accent));
 }
 
-/* Responsive */
 @media (max-width: 480px) {
   .card-adjusted {
     width: 90%;
     min-width: 280px;
     height: 400px;
   }
-
-  .card-image-link {
-    flex: 0 0 auto;
-    height: 180px;
+  .card-image-link,
+  .card-image-placeholder-consistent {
+    flex: 0 0 180px;
   }
 }
 </style>
