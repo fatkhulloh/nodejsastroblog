@@ -1,0 +1,179 @@
+---
+import MainLayout from "../../layouts/MainLayout.astro";
+---
+
+<MainLayout>
+  <main class="login-page">
+    <div class="login-container">
+      <h1 class="hh">Login</h1>
+      <form id="loginForm" class="login-form" method="POST">
+        <label for="identifier">Email</label>
+        <input type="email" id="identifier" name="identifier" placeholder="you@example.com" required />
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required />
+
+        <button type="submit" class="btn-login">Login</button>
+        <p id="loginMessage"></p>
+      </form>
+
+      <p class="register-text">
+        Belum punya akun? <a href="/register">Register</a>
+      </p>
+    </div>
+  </main>
+
+  <script type="module">
+    const form = document.getElementById('loginForm');
+    const message = document.getElementById('loginMessage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const identifier = formData.get('identifier');
+      const password = formData.get('password');
+
+      try {
+        const res = await fetch('http://localhost:1337/api/auth/local', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          message.textContent = `Login gagal: ${data.error || data.message}`;
+          message.style.color = 'red';
+          return;
+        }
+        console.log("Responsenya: ", data);
+        console.log("Jwt: ", data.jwt);
+        // sessionStorage.setItem("jwt", token);
+        localStorage.setItem('data', JSON.stringify(data));
+        const dt = JSON.parse(localStorage.getItem("data"));
+        console.log("Storage: ",dt);
+        message.textContent = `Login berhasil! Halo ${data.user.username || data.user.email}`;
+        message.style.color = 'green';
+        // form.reset();
+      } catch (err) {
+        message.textContent = `Error: ${err.message}`;
+        message.style.color = 'red';
+      }
+    });
+  </script>
+</MainLayout>
+
+<style>
+* { box-sizing: border-box; }
+
+/* Page layout */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  padding: 2rem;
+  background-color: hsl(var(--bkg));
+}
+
+.hh {
+  font-weight: bold;
+}
+
+/* Container */
+.login-container {
+  width: 100%;
+  max-width: 500px;
+  background-color: hsl(var(--muted));
+  padding: 2.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Heading */
+.login-container h1 {
+  text-align: center;
+  color: hsl(var(--txt));
+  font-size: 2rem;
+  margin: 0;
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-form label {
+  font-size: var(--fs-sm);
+  color: hsl(var(--txt-muted));
+}
+
+.login-form input {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid hsl(var(--border-sm));
+  background-color: hsl(var(--bkg));
+  color: hsl(var(--txt));
+  font-size: var(--fs-sm);
+  width: 100%;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: hsl(var(--accent));
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.2);
+}
+
+/* Button */
+.btn-login {
+  padding: 0.75rem 1rem;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--txt-inverse));
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.btn-login:hover {
+  background-color: hsl(var(--accent-hover));
+}
+
+/* Message */
+#loginMessage {
+  font-size: var(--fs-sm);
+  text-align: center;
+  min-height: 1.5em;
+}
+
+/* Register text */
+.register-text {
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: hsl(var(--txt-muted));
+}
+
+.register-text a {
+  color: hsl(var(--accent));
+  text-decoration: none;
+}
+
+.register-text a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1.5rem;
+  }
+}
+</style>
