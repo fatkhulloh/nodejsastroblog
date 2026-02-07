@@ -30,7 +30,7 @@ const currentProject = projects.find(
 
 <MainLayout>
   {currentProject ? (
-    <div class="post-detail-wrapper">
+    <div class="post-detail-wrapper" data-id={currentProject.documentId}>
       <article class="post-detail">
         {currentProject.image ? (
           <img
@@ -51,120 +51,190 @@ const currentProject = projects.find(
           <p class="post-description">
             {currentProject.description || "Tidak ada deskripsi."}
           </p>
-          <a href="/backend/posts" class="btn-back">Kembali ke Daftar Project</a>
+
+          <div class="post-actions">
+            <a href="/backend/posts" class="btn-back">Kembali ke Daftar Project</a>
+            <button id="deleteBtn" class="btn-delete">Hapus Project</button>
+          </div>
         </div>
       </article>
     </div>
   ) : (
     <p>Project tidak ditemukan.</p>
   )}
+  
+  <script type="module">
+    const deleteBtn = document.getElementById('deleteBtn');
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        if (!confirm('Apakah kamu yakin ingin menghapus project ini?')) return;
+
+        const jwt = JSON.parse(localStorage.getItem('data'))?.jwt;
+        if (!jwt) {
+          alert('Kamu harus login dulu!');
+          return;
+        }
+        const wrapper = document.querySelector('.post-detail-wrapper');
+        const projectId = wrapper.dataset.id; // ambil ID dari data-attribute
+        try {
+          const res = await fetch(`http://localhost:1337/api/projects/${projectId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${jwt}`
+            }
+          });
+
+          if (!res.ok) throw new Error('Gagal menghapus project');
+
+          alert('Project berhasil dihapus!');
+          window.location.href = '/backend/posts'; // redirect ke daftar project
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+      });
+    }
+  </script>
+
+  <style>
+
+    .btn-delete {
+      display: inline-flex !important;          /* pastikan tidak terpengaruh display global */
+      justify-content: center;                  /* teks di tengah */
+      align-items: center;                      /* teks vertikal di tengah */
+      padding: 0.5rem 1rem;                     /* jarak dalam tombol */
+      min-width: 120px;                          /* minimal lebar tombol */
+      max-width: 400px;                          /* maksimal lebar tombol */
+      width: 300px;
+      height: 60px;
+      background-color: magenta !important;
+      /* background-color: hsl(var(--txt-light));  */
+      color: hsl(var(--bg-dark));               /* warna teks */
+      border-radius: var(--radius-sm);          /* sudut membulat */
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: var(--fs-md);
+      text-align: center;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .btn-delete:hover {
+      background-color: hsl(var(--accent-hover)); /* warna saat hover */
+      color: hsl(var(--txt-inverse));             /* teks putih saat hover */
+    }
+
+    .post-detail-wrapper {
+      width: 100%;
+      background-color: hsl(var(--bg-dark));
+      padding: 3rem 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .post-detail {
+      width: 80%;
+      background-color: hsl(var(--bg-card));
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      min-height: 600px;
+    }
+
+    .post-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+    }
+
+    .post-image.placeholder {
+      background-color: hsl(var(--bg-muted));
+      height: 400px;
+    }
+
+    .post-content {
+      width: 100%;
+      padding: 2rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      flex: 1;
+      align-items: flex-start;
+    }
+
+    .post-title {
+      font-size: 2rem;
+      margin: 0;
+      color: hsl(var(--txt-light));
+      width: 90%;
+      text-align: left;
+    }
+
+    .post-meta {
+      font-size: var(--fs-sm);
+      color: hsl(var(--txt-muted));
+      width: 90%;
+      text-align: left;
+    }
+
+    .post-description {
+      font-size: var(--fs-md);
+      line-height: var(--lh-1-6);
+      color: hsl(var(--txt-light));
+      width: 90%;
+      text-align: left;
+      min-height: calc(var(--fs-md) * var(--lh-1-6) * 3);
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: auto;
+      width: 90%;
+    }
+
+    .btn-back {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: hsl(var(--accent));
+      color: hsl(var(--txt-inverse));
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .btn-back:hover {
+      background-color: hsl(var(--accent-hover));
+    }
+
+    .btn-delete {
+      padding: 0.5rem 1rem;
+      background-color: hsl(var(--txt-light));
+      color: hsl(var(--bg-dark));
+      border-radius: var(--radius-sm);
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-delete:hover {
+      background-color: hsl(var(--accent-hover));
+      color: hsl(var(--txt-inverse));
+    }
+
+    @media (max-width: 1024px) {
+      .post-detail { width: 90%; }
+    }
+
+    @media (max-width: 768px) {
+      .post-image { height: 250px; }
+      .post-content { padding: 1rem 0; }
+      .post-title { font-size: 1.5rem; }
+      .post-description { width: 95%; }
+      .post-actions { flex-direction: column; gap: 0.5rem; }
+    }
+  </style>
 </MainLayout>
-
-<style>
-.post-detail-wrapper {
-  width: 100%;
-  background-color: hsl(var(--bg-dark));
-  padding: 3rem 0;
-  display: flex;
-  justify-content: center;
-}
-
-/* card */
-.post-detail {
-  width: 80%;
-  background-color: hsl(var(--bg-card));
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  min-height: 600px;
-}
-
-/* image */
-.post-image {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-}
-
-.post-image.placeholder {
-  background-color: hsl(var(--bg-muted));
-  height: 400px;
-}
-
-/* content */
-.post-content {
-  width: 100%;
-  padding: 2rem 0; /* hanya padding vertikal */
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1;
-  align-items: center; /* tombol tetap start */
-}
-
-.post-title {
-  font-size: 2rem;
-  margin: 0;
-  color: hsl(var(--txt-light));
-  width: 90%;
-  text-align: left;
-}
-
-.post-meta {
-  font-size: var(--fs-sm);
-  color: hsl(var(--txt-muted));
-  width: 90%;
-  text-align: left;
-}
-
-.post-description {
-  font-size: var(--fs-md);
-  line-height: var(--lh-1-6);
-  color: hsl(var(--txt-light));
-  width: 90%;
-  text-align: left;
-  min-height: calc(var(--fs-md) * var(--lh-1-6) * 3); /* selalu ada space meski sedikit konten */
-}
-
-/* tombol tetap di bawah */
-.btn-back {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background-color: hsl(var(--accent));
-  color: hsl(var(--txt-inverse));
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  font-weight: 500;
-  margin-top: auto;
-  width: fit-content;
-  align-self: flex-start;
-}
-
-.btn-back:hover {
-  background-color: hsl(var(--accent-hover));
-}
-
-/* responsive */
-@media (max-width: 1024px) {
-  .post-detail {
-    width: 90%;
-  }
-}
-
-@media (max-width: 768px) {
-  .post-image {
-    height: 250px;
-  }
-  .post-content {
-    padding: 1rem 0;
-  }
-  .post-title {
-    font-size: 1.5rem;
-  }
-  .post-description {
-    width: 95%;
-  }
-}
-</style>
