@@ -8,7 +8,7 @@ export async function getStaticPaths() {
   const json = await res.json();
 
   // generate slug untuk setiap project berdasarkan id
-  const posts = [...new Set(json.data.map(p => slugify(p.id)))];
+  const posts = [...new Set(json.data.map(p => slugify(p.documentId)))];
 
   return posts.map(post => ({
     params: { post },
@@ -24,7 +24,7 @@ const currentPostSlug = Astro.params.post;
 
 // Filter project yang sesuai dengan slug
 const currentProject = projects.find(
-  project => slugify(project.id) === currentPostSlug
+  project => slugify(project.documentId) === currentPostSlug
 );
 ---
 
