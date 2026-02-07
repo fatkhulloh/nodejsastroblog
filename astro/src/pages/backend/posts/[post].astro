@@ -26,11 +26,13 @@ const currentPostSlug = Astro.params.post;
 const currentProject = projects.find(
   project => slugify(project.documentId) === currentPostSlug
 );
+// const idx = slugify(currentProject.id);
+const idx = slugify(currentProject.documentId);
 ---
 
 <MainLayout>
   {currentProject ? (
-    <div class="post-detail-wrapper" data-id={currentProject.documentId}>
+    <div class="post-detail-wrapper" data-id={idx}>
       <article class="post-detail">
         {currentProject.image ? (
           <img
@@ -77,13 +79,16 @@ const currentProject = projects.find(
         }
         const wrapper = document.querySelector('.post-detail-wrapper');
         const projectId = wrapper.dataset.id; // ambil ID dari data-attribute
+        console.log("JWT: ", jwt);
         try {
           const res = await fetch(`http://localhost:1337/api/projects/${projectId}`, {
             method: 'DELETE',
             headers: {
-              'Authorization': `Bearer ${jwt}`
+              'Authorization': `Bearer ${jwt}`,
+              'Content-Type': 'application/json' // optional
             }
           });
+          console.log("DatId: ", projectId);
 
           if (!res.ok) throw new Error('Gagal menghapus project');
 

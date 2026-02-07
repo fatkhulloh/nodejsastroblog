@@ -4,7 +4,7 @@ import { Image } from "astro:assets";
 import Link from "./Link.astro";
 
 const { project } = Astro.props;
-const { title,documentId, date, author, category, image, description, shortdescription } = project;
+const { title, documentId, date, author, category, image, description, shortdescription } = project;
 
 // URL halaman project
 const url = `/backend/posts/${slugify(documentId)}`;

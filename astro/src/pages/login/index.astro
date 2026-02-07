@@ -63,7 +63,7 @@ import MainLayout from "../../layouts/MainLayout.astro";
         console.log("Storage: ",dt);
         message.textContent = `Login berhasil! Halo ${data.user.username || data.user.email}`;
         message.style.color = 'green';
-        window.location.href = '/'; //redirect
+        // window.location.href = '/'; //redirect
         // form.reset();
       } catch (err) {
         message.textContent = `Error: ${err.message}`;
