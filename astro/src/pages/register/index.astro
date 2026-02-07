@@ -59,6 +59,7 @@ import MainLayout from "../../layouts/MainLayout.astro";
 
         message.textContent = `Register berhasil! Halo ${data.user.username || data.user.email}`;
         message.style.color = 'green';
+        window.location.href = '/'; //redirect
         // form.reset();
       } catch (err) {
         message.textContent = `Error: ${err.message}`;

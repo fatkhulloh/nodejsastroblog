@@ -1,6 +1,5 @@
 ---
-import MainLayout from "../../layouts/MainLayout.astro";
-
+import MainLayout from "../../../../layouts/MainLayout.astro";
 let message = "";
 ---
 
@@ -26,7 +25,7 @@ let message = "";
 
       <div class="form-group">
         <label>Author</label>
-        <input type="text" name="author" required />
+        <input type="text" name="author" id="authorInput" disabled />
       </div>
 
       <div class="form-group">
@@ -36,7 +35,7 @@ let message = "";
 
       <div class="form-group">
         <label>Date</label>
-        <input type="date" name="date" required />
+        <input type="date" name="date" id="dateInput" required />
       </div>
 
       <div class="form-group">
@@ -54,6 +53,26 @@ let message = "";
     const form = document.getElementById('projectForm');
     const preview = document.getElementById('preview');
     const msg = document.getElementById('msg');
+    const authorInput = document.getElementById('authorInput');
+    const dateInput = document.getElementById('dateInput');
+
+    // 0️⃣ Ambil data user dari localStorage
+    const storedDataStr = localStorage.getItem('data');
+    if (!storedDataStr) {
+      // Jika belum login, redirect ke home
+      window.location.href = '/';
+    } else {
+      const storedData = JSON.parse(storedDataStr);
+      const username = storedData?.user?.username || storedData?.user?.email || '';
+      authorInput.value = username;
+    }
+
+    // 1️⃣ Set tanggal hari ini saat pertama reload
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${yyyy}-${mm}-${dd}`;
 
     // preview image
     form.image.addEventListener('change', (e) => {
@@ -67,22 +86,28 @@ let message = "";
       }
     });
 
+    // submit form
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       try {
-        // 1️⃣ Buat entry project dulu tanpa image
+        const jwt = JSON.parse(localStorage.getItem('data')).jwt;
+
+        // 2️⃣ Buat entry project tanpa image
         const resEntry = await fetch('http://localhost:1337/api/projects', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwt}`
+          },
           body: JSON.stringify({
             data: {
               title: form.title.value,
               shortdescription: form.shortdescription.value,
               description: form.description.value,
-              author: form.author.value,
+              author: authorInput.value,
               category: form.category.value,
-              date: form.date.value,
+              date: dateInput.value,
               draft: false
             }
           })
@@ -93,17 +118,20 @@ let message = "";
         const entry = await resEntry.json();
         const projectId = entry.data.id;
 
-        // 2️⃣ Upload image kalau ada
+        // 3️⃣ Upload image kalau ada
         if (form.image.files[0]) {
           const formData = new FormData();
-          formData.append('files', form.image.files[0]); // HARUS 'files'
+          formData.append('files', form.image.files[0]);
           formData.append('refId', projectId);
-          formData.append('ref', 'api::project.project'); // UID collection type
-          formData.append('field', 'image');             // nama field media
+          formData.append('ref', 'api::project.project');
+          formData.append('field', 'image');
 
           const resUpload = await fetch('http://localhost:1337/api/upload', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+              'Authorization': `Bearer ${jwt}`
+            }
           });
 
           if (!resUpload.ok) throw new Error('Failed to upload image');
@@ -114,6 +142,10 @@ let message = "";
         form.reset();
         preview.src = '';
         preview.style.display = 'none';
+
+        // reset author dan tanggal setelah reset
+        authorInput.value = JSON.parse(localStorage.getItem('data')).user.username;
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
 
       } catch (err) {
         msg.textContent = 'Error submitting project: ' + err.message;

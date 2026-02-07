@@ -1,8 +1,8 @@
 ---
+// Navbar.astro
 import { Icon } from "astro-icon/components";
 import Link from "./Link.astro";
 import navData from "../data/navData";
-
 ---
 
 <nav aria-label="Primary">
@@ -27,21 +27,29 @@ import navData from "../data/navData";
       ))}
     </ul>
 
-    <!-- Buttons kanan atas -->
-    <div class="nav-buttons">
-      <Link text="Login" href="/login" style="secondary" isFilled={true} />
-      <Link text="Register" href="/register" style="primary" isFilled={true} />
+    <!-- Buttons / User menu kanan atas -->
+    <div class="nav-buttons" id="navButtons">
+      <Link text="Login" href="/login" style="secondary" isFilled={true} id="loginBtn"/>
+      <Link text="Register" href="/register" style="primary" isFilled={true} id="registerBtn"/>
+      
+      <!-- User dropdown -->
+      <div class="user-menu" id="userMenu" style="display:none;">
+        <button id="usernameBtn">Username</button>
+        <ul class="dropdown" id="dropdownMenu">
+          <li><button id="logoutBtn">Logout</button></li>
+        </ul>
+      </div>
     </div>
 
     <!-- Hamburger untuk mobile -->
-    <button class="hamburger" aria-label="Menu" onClick={() => setOpen(!open)}>
+    <button class="hamburger" aria-label="Menu" id="hamburgerBtn">
       <span></span>
       <span></span>
       <span></span>
     </button>
 
     <!-- Mobile menu dropdown -->
-    <ul class="mobile-menu">
+    <ul class="mobile-menu" id="mobileMenu">
       {navData.map((item) => (
         <li>
           <Link 
@@ -57,22 +65,98 @@ import navData from "../data/navData";
   </div>
 </nav>
 
-<script>
-  import "../js/nav.js";
+<script type="module">
+  // Navbar link aktif
+  const navLinks = document.querySelectorAll("[data-navLink]");
+  navLinks.forEach((link) => {
+    if (link.getAttribute("href") === window.location.pathname) {
+      link.setAttribute("aria-current", "page");
+    }
+  });
+
+  // Cek JWT di localStorage
+  const dataStr = localStorage.getItem("data");
+  const loginBtn = document.getElementById("loginBtn");
+  const registerBtn = document.getElementById("registerBtn");
+  const userMenu = document.getElementById("userMenu");
+  const usernameBtn = document.getElementById("usernameBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (dataStr) {
+    try {
+      const data = JSON.parse(dataStr);
+      // sembunyikan login/register
+      loginBtn.style.display = "none";
+      registerBtn.style.display = "none";
+      
+      // tampilkan username
+      usernameBtn.textContent = data.user.username || data.user.email;
+      userMenu.style.display = "flex";
+
+    } catch (err) {
+      console.error("Error parsing data:", err);
+    }
+  }
+
+  // Toggle dropdown
+  usernameBtn.addEventListener("click", () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  });
+
+  // Logout
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("data");
+    window.location.reload();
+  });
+
+  // klik di luar dropdown menutup dropdown
+  document.addEventListener("click", (e) => {
+    if (!userMenu.contains(e.target)) {
+      dropdownMenu.style.display = "none";
+    }
+  });
+
+  // Hamburger menu toggle
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+
+  hamburgerBtn.addEventListener("click", () => {
+    mobileMenu.style.display = mobileMenu.style.display === "flex" ? "none" : "flex";
+  });
+
+  // Hide mobile menu saat resize ke desktop
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768) {
+      mobileMenu.style.display = "none";
+    }
+  });
 </script>
 
 <style>
+/* Navbar umum */
 
-  /* Desktop menu */
-.nav-links li a[aria-current="page"] {
-  color: hsl(var(--accent)); /* ganti warna link aktif */
-  font-weight: 700; /* optional: lebih tebal */
+/* Override khusus untuk username di navbar */
+.user-menu #usernameBtn {
+  width: auto;            /* biar mengikuti panjang username */
+  min-width: 6rem;        /* optional, supaya tidak terlalu kecil */
+  height: auto;           /* menyesuaikan padding */
+  padding: 0.5rem 1rem;   /* ruang di dalam tombol */
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between; /* jika mau icon dropdown */
+  /* background-color: hsl(var(--accent)); */
+  /* background-color: gray; */
+  color: hsl(var(--txt-inverse));
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
 }
-
-/* Mobile menu */
-.mobile-menu li a[aria-current="page"] {
-  color: hsl(var(--accent));
-  font-weight: 700;
+.user-menu .dropdown {
+  /* top: calc(100% + 0.25rem);  */
+  top: calc(100% + 0.65rem); /* beri jarak dari tombol */
+  right: 0;
+  min-width: 140px;          /* lebih lebar */
+  max-width: 250px;
 }
 
 .navbar {
@@ -114,10 +198,16 @@ import navData from "../data/navData";
   color: hsl(var(--accent));
 }
 
+.nav-links li a[aria-current="page"] {
+  color: hsl(var(--accent));
+  font-weight: 700;
+}
+
 /* Buttons kanan atas */
 .nav-buttons {
   display: flex;
   gap: 0.75rem;
+  align-items: center;
 }
 
 .nav-buttons a {
@@ -144,6 +234,54 @@ import navData from "../data/navData";
 }
 
 .nav-buttons a[style="secondary"]:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--txt-inverse));
+}
+
+/* User menu */
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+#usernameBtn {
+  background: none;
+  border: none;
+  color: hsl(var(--txt-light));
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
+#usernameBtn:hover {
+  color: hsl(var(--accent));
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: hsl(var(--bg-dark));
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  overflow: hidden;
+  min-width: 120px;
+  display: none;
+  flex-direction: column;
+}
+
+.dropdown li button {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  color: hsl(var(--txt-light));
+  cursor: pointer;
+}
+
+.dropdown li button:hover {
   background-color: hsl(var(--accent));
   color: hsl(var(--txt-inverse));
 }
@@ -181,12 +319,11 @@ import navData from "../data/navData";
   overflow: hidden;
 }
 
-.mobile-menu li {
-  padding: 0.75rem 1rem;
-}
-
 .mobile-menu li a {
   color: hsl(var(--txt-light));
+  padding: 0.75rem 1rem;
+  display: block;
+  text-decoration: none;
 }
 
 .mobile-menu li a:hover {
@@ -198,14 +335,8 @@ import navData from "../data/navData";
   .nav-links {
     display: none;
   }
-
   .hamburger {
     display: flex;
-  }
-
-  .mobile-menu {
-    display: flex;
-    flex-direction: column;
   }
 }
 </style>

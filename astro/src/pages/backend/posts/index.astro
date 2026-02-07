@@ -1,11 +1,12 @@
 ---
 import MainLayout from "../../../layouts/MainLayout.astro";
 import PostCardBackend from "../../../components/PostCardBackend.astro"
+import Link from "../../../components/Link.astro";
 // Fetch data dari Strapi
 // const res = await fetch("http://localhost:1337/api/projects");
 const res = await fetch('http://localhost:1337/api/projects?populate=image');
 const data = await res.json();
-
+const url = "/backend/posts/add"
 // Data projects ada di data.data
 const projects = data.data || [];
 
@@ -20,7 +21,8 @@ const projects = data.data || [];
 <MainLayout title="Blog From Data Backend">
   <section class="container" aria-label="Blog Posts From Backend">
     <h1 class="h1">Blog Posts</h1>
-    <h3>From Backend</h3>
+    <!-- <h3>From Backend</h3> -->
+      <Link href={url} text="Add Post" style="secondary" />
 
     {projects.length > 0 ? (
       <div class=" post-container grid gap-6 mt-6">
