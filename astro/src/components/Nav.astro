@@ -2,7 +2,7 @@
 import { Icon } from "astro-icon/components";
 import Link from "./Link.astro";
 import navData from "../data/navData";
-import { useState } from "preact/hooks";
+
 ---
 
 <nav aria-label="Primary">
@@ -57,12 +57,24 @@ import { useState } from "preact/hooks";
   </div>
 </nav>
 
-<script type="module">
-  import { useState } from "preact/hooks";
-  const [open, setOpen] = useState(false);
+<script>
+  import "../js/nav.js";
 </script>
 
 <style>
+
+  /* Desktop menu */
+.nav-links li a[aria-current="page"] {
+  color: hsl(var(--accent)); /* ganti warna link aktif */
+  font-weight: 700; /* optional: lebih tebal */
+}
+
+/* Mobile menu */
+.mobile-menu li a[aria-current="page"] {
+  color: hsl(var(--accent));
+  font-weight: 700;
+}
+
 .navbar {
   display: flex;
   align-items: center;
