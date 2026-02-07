@@ -7,7 +7,7 @@ export async function getStaticPaths() {
   const res = await fetch("http://localhost:1337/api/projects?populate=image");
   const json = await res.json();
 
-  // generate slug untuk setiap project berdasarkan id atau title
+  // generate slug untuk setiap project berdasarkan id
   const posts = [...new Set(json.data.map(p => slugify(p.id)))];
 
   return posts.map(post => ({
@@ -30,42 +30,58 @@ const currentProject = projects.find(
 
 <MainLayout>
   {currentProject ? (
-    <article class="post-detail">
-      {currentProject.image ? (
-        <img
-          src={`http://localhost:1337${currentProject.image.url}`}
-          alt={currentProject.title}
-          class="post-image"
-        />
-      ) : (
-        <div class="post-image placeholder"></div>
-      )}
+    <div class="post-detail-wrapper">
+      <article class="post-detail">
+        {currentProject.image ? (
+          <img
+            src={`http://localhost:1337${currentProject.image.url}`}
+            alt={currentProject.title}
+            class="post-image"
+          />
+        ) : (
+          <div class="post-image placeholder"></div>
+        )}
 
-      <div class="post-content">
-        <h1 class="post-title">{currentProject.title}</h1>
-        <div class="post-meta">
-          <span>by {currentProject.author || "Unknown"}</span> | 
-          <span>{formatDate(currentProject.date)}</span>
+        <div class="post-content">
+          <h1 class="post-title">{currentProject.title}</h1>
+          <div class="post-meta">
+            <span>by {currentProject.author || "Unknown"}</span> | 
+            <span>{formatDate(currentProject.date)}</span>
+          </div>
+          <p class="post-description">
+            {currentProject.description || "Tidak ada deskripsi."}
+          </p>
+          <a href="/backend/posts" class="btn-back">Kembali ke Daftar Project</a>
         </div>
-        <p class="post-description">{currentProject.description || "Tidak ada deskripsi."}</p>
-        <a href="/backend/posts" class="btn-back">Kembali ke Daftar Project</a>
-      </div>
-    </article>
+      </article>
+    </div>
   ) : (
     <p>Project tidak ditemukan.</p>
   )}
 </MainLayout>
 
 <style>
-.post-detail {
-  max-width: 800px;
-  margin: 2rem auto;
-  background-color: hsl(var(--muted));
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
+.post-detail-wrapper {
+  width: 100%;
+  background-color: hsl(var(--bg-dark));
+  padding: 3rem 0;
+  display: flex;
+  justify-content: center;
 }
 
+/* card */
+.post-detail {
+  width: 80%;
+  background-color: hsl(var(--bg-card));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+}
+
+/* image */
 .post-image {
   width: 100%;
   height: 400px;
@@ -73,34 +89,46 @@ const currentProject = projects.find(
 }
 
 .post-image.placeholder {
-  background-color: hsl(var(--muted-2));
+  background-color: hsl(var(--bg-muted));
   height: 400px;
 }
 
+/* content */
 .post-content {
-  padding: 2rem;
+  width: 100%;
+  padding: 2rem 0; /* hanya padding vertikal */
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1;
+  align-items: center; /* tombol tetap start */
 }
 
 .post-title {
   font-size: 2rem;
   margin: 0;
-  color: hsl(var(--txt));
+  color: hsl(var(--txt-light));
+  width: 90%;
+  text-align: left;
 }
 
 .post-meta {
   font-size: var(--fs-sm);
   color: hsl(var(--txt-muted));
+  width: 90%;
+  text-align: left;
 }
 
 .post-description {
   font-size: var(--fs-md);
   line-height: var(--lh-1-6);
-  color: hsl(var(--txt));
+  color: hsl(var(--txt-light));
+  width: 90%;
+  text-align: left;
+  min-height: calc(var(--fs-md) * var(--lh-1-6) * 3); /* selalu ada space meski sedikit konten */
 }
 
+/* tombol tetap di bawah */
 .btn-back {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -109,11 +137,34 @@ const currentProject = projects.find(
   border-radius: var(--radius-sm);
   text-decoration: none;
   font-weight: 500;
-  margin-top: 1rem;
+  margin-top: auto;
   width: fit-content;
+  align-self: flex-start;
 }
 
 .btn-back:hover {
   background-color: hsl(var(--accent-hover));
+}
+
+/* responsive */
+@media (max-width: 1024px) {
+  .post-detail {
+    width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  .post-image {
+    height: 250px;
+  }
+  .post-content {
+    padding: 1rem 0;
+  }
+  .post-title {
+    font-size: 1.5rem;
+  }
+  .post-description {
+    width: 95%;
+  }
 }
 </style>
